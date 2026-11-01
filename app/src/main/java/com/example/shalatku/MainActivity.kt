@@ -1,107 +1,138 @@
-    package com.example.shalatku
+package com.example.shalatku
 
-    import android.os.Bundle
-    import androidx.activity.ComponentActivity
-    import androidx.activity.compose.setContent
-    import androidx.activity.enableEdgeToEdge
-    import androidx.compose.foundation.layout.padding
-    import androidx.compose.material.icons.Icons
-    import androidx.compose.material.icons.filled.Add
-    import androidx.compose.material.icons.filled.CheckCircle
-    import androidx.compose.material.icons.filled.Home
-    import androidx.compose.material3.Icon
-    import androidx.compose.material3.NavigationBar
-    import androidx.compose.material3.NavigationBarItem
-    import androidx.compose.material3.Scaffold
-    import androidx.compose.material3.Text
-    import androidx.compose.runtime.Composable
-    import androidx.lifecycle.viewmodel.compose.viewModel
-    import androidx.compose.runtime.getValue
-    import androidx.compose.runtime.mutableStateOf
-    import androidx.compose.runtime.remember
-    import androidx.compose.runtime.setValue
-    import androidx.compose.ui.Modifier
-    import com.example.shalatku.ui.theme.ShalatkuTheme
-    import androidx.compose.ui.tooling.preview.Preview
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.shalatku.ui.theme.ShalatkuTheme
 
-    class MainActivity : ComponentActivity() {
-        override fun onCreate(savedInstanceState: Bundle?) {
-            super.onCreate(savedInstanceState)
-            enableEdgeToEdge()
-            setContent {
-                ShalatkuTheme {
-                    ShalatkuApp()
-                }
+class MainActivity : ComponentActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        setContent {
+            ShalatkuTheme {
+                ShalatkuApp()
             }
         }
     }
+}
 
-    @Composable
-    fun ShalatkuApp(
-        viewModel: SalatKuViewModel = viewModel()
-    ) {
-        var selected by remember { mutableStateOf(0) }
+@Composable
+fun ShalatkuApp(
+    viewModel: SalatKuViewModel = viewModel()
+) {
 
-        Scaffold(
-            bottomBar = {
-                NavigationBar {
-                    NavigationBarItem(
-                        selected = selected == 0,
-                        onClick = { selected = 0 },
-                        icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                        label = { Text("Home") }
-                    )
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-                    NavigationBarItem(
-                        selected = selected == 1,
-                        onClick = { selected = 1 },
-                        icon = { Icon(Icons.Default.CheckCircle, contentDescription = null) },
-                        label = { Text("Tracker") }
-                    )
+    var selected by rememberSaveable {
+        mutableIntStateOf(0)
+    }
 
-                    NavigationBarItem(
-                        selected = selected == 2,
-                        onClick = { selected = 2 },
-                        icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                        label = { Text("Tasbih") }
-                    )
-                }
-            }
-        ) { innerPadding ->
+    Scaffold(
 
-            val contentModifier = Modifier.padding(innerPadding)
+        bottomBar = {
 
-            when (selected) {
+            NavigationBar {
 
-                0 -> HomeScreen(
-                    prayers = samplePrayers,
-                    selectedDay = viewModel.selectedDay,
-                    onSelectDay = viewModel::selectDay,
-                    modifier = Modifier.padding(innerPadding)
+                NavigationBarItem(
+                    selected = selected == 0,
+                    onClick = { selected = 0 },
+                    icon = {
+                        Icon(Icons.Default.Home, null)
+                    },
+                    label = {
+                        Text("Home")
+                    }
                 )
 
-                1 -> TrackerScreen(
-                    prayers = samplePrayers,
-                    donePrayers = viewModel.donePrayers,
-                    onToggle = viewModel::togglePrayer,
-                    onClear = viewModel::clearPrayers,
-                    modifier = Modifier.padding(innerPadding)
+                NavigationBarItem(
+                    selected = selected == 1,
+                    onClick = { selected = 1 },
+                    icon = {
+                        Icon(Icons.Default.CheckCircle, null)
+                    },
+                    label = {
+                        Text("Tracker")
+                    }
                 )
 
-                2 -> TasbihScreen(
-                    count = viewModel.tasbihCount,
-                    onIncrement = viewModel::incrementTasbih,
-                    onReset = viewModel::resetTasbih,
-                    modifier = contentModifier,
-                    rounds = viewModel.completedRounds,
-                    onSetRoundSize = viewModel::setRoundSize
+                NavigationBarItem(
+                    selected = selected == 2,
+                    onClick = { selected = 2 },
+                    icon = {
+                        Icon(Icons.Default.Add, null)
+                    },
+                    label = {
+                        Text("Tasbih")
+                    }
                 )
             }
         }
-    }
 
-    @Preview
-    @Composable
-    fun TasbihScreenPreview() {
-        TasbihScreen(count = 12, rounds = 2, onIncrement = {}, onReset = {}, onSetRoundSize = {})
+    ) { innerPadding ->
+
+        val contentModifier = Modifier.padding(innerPadding)
+
+        when (selected) {
+
+            0 -> HomeScreen(
+                prayers = uiState.prayers,
+                selectedDay = uiState.selectedDay,
+                onSelectDay = viewModel::selectDay,
+                prayerTimes = uiState.prayerTimes,
+                onRefreshPrayerTimes = viewModel::loadPrayerTimes,
+                modifier = contentModifier
+            )
+
+            1 -> TrackerScreen(
+                prayers = uiState.prayers,
+                donePrayers = uiState.donePrayers,
+                doneCount = uiState.doneCount,
+                onToggle = viewModel::togglePrayer,
+                onClear = viewModel::clearPrayers,
+                modifier = contentModifier
+
+            )
+
+            2 -> TasbihScreen(
+                count = uiState.tasbihCount,
+                rounds = uiState.completedRounds,
+                roundSize = uiState.roundSize,
+                onIncrement = viewModel::incrementTasbih,
+                onReset = viewModel::resetTasbih,
+                onSelectRoundSize = viewModel::setRoundSize,
+                modifier = contentModifier
+            )
+        }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewApp() {
+    ShalatkuTheme {
+        ShalatkuApp()
+    }
+}

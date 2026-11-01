@@ -20,11 +20,13 @@ import androidx.compose.ui.unit.dp
 fun TasbihScreen(
     count: Int,
     rounds: Int,
-    onSetRoundSize: (Int) -> Unit,
+    roundSize: Int,
     onIncrement: () -> Unit,
     onReset: () -> Unit,
+    onSelectRoundSize: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -34,14 +36,14 @@ fun TasbihScreen(
     ) {
 
         Text(
-            "Tasbih",
+            text = "Tasbih",
             style = MaterialTheme.typography.headlineMedium
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            "Pilih Target",
+            text = "Pilih Target",
             style = MaterialTheme.typography.titleMedium
         )
 
@@ -52,19 +54,19 @@ fun TasbihScreen(
         ) {
 
             Button(
-                onClick = { onSetRoundSize(33) }
+                onClick = { onSelectRoundSize(33) }
             ) {
                 Text("33")
             }
 
             Button(
-                onClick = { onSetRoundSize(99) }
+                onClick = { onSelectRoundSize(99) }
             ) {
                 Text("99")
             }
 
             Button(
-                onClick = { onSetRoundSize(100) }
+                onClick = { onSelectRoundSize(100) }
             ) {
                 Text("100")
             }
@@ -73,14 +75,21 @@ fun TasbihScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            "Rounds : $rounds",
+            text = "Target : $roundSize",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Rounds : $rounds",
             style = MaterialTheme.typography.titleMedium
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            "$count",
+            text = "$count / $roundSize",
             style = MaterialTheme.typography.displayLarge
         )
 

@@ -1,16 +1,17 @@
 package com.example.shalatku
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -18,49 +19,50 @@ import androidx.compose.ui.unit.dp
 fun TrackerScreen(
     prayers: List<Prayer>,
     donePrayers: List<String>,
+    doneCount: Int,
     onToggle: (String) -> Unit,
     onClear: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
     Column(
-        modifier = modifier.padding(16.dp)
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
     ) {
 
         Text(
-            "Prayer Tracker",
-            style = MaterialTheme.typography.headlineMedium
+            text = "$doneCount of ${prayers.size} prayers done today",
+            style = MaterialTheme.typography.titleMedium
         )
-
-        Text(
-            "${donePrayers.size} of ${prayers.size} prayers done today",
-            style = MaterialTheme.typography.bodyLarge
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = onClear
+            onClick = onClear,
+            modifier = Modifier.padding(vertical = 8.dp)
         ) {
             Text("Clear All")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
 
-        prayers.forEach { prayer ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = prayer.name in donePrayers,
-                    onCheckedChange = {
-                        onToggle(prayer.name)
-                    }
-                )
+            items(prayers) { prayer ->
 
-                Text(
-                    text = prayer.name,
-                    style = MaterialTheme.typography.titleMedium
-                )
+                Row {
+
+                    Checkbox(
+                        checked = prayer.name in donePrayers,
+                        onCheckedChange = {
+                            onToggle(prayer.name)
+                        }
+                    )
+
+                    Text(
+                        prayer.name,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
             }
         }
     }
